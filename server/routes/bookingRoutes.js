@@ -60,7 +60,8 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
 
 router.post("/book-show", authMiddleware, async (req, res) => {
   try {
-    const { show, transactionId, seats, user } = req.body;
+    const { show, transactionId, seats } = req.body;
+    const user = req.user.userId;
 
     const newBooking = new bookingModel({ show, transactionId, seats, user });
     await newBooking.save();
