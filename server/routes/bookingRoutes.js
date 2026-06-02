@@ -10,12 +10,13 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
   try {
     const { showId, seats, userId, amount } = req.body;
 
-    const clientUrl = (
+    const rawClientUrl =
       req.headers.origin ||
       req.headers.referer ||
       process.env.CLIENT_URL ||
-      ""
-    ).replace(/\/$/, "");
+      "";
+    const clientUrl =
+      typeof rawClientUrl === "string" ? rawClientUrl.replace(/\/$/, "") : "";
 
     if (!clientUrl) {
       return res.send({
