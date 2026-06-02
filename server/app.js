@@ -12,6 +12,7 @@ const showRoute = require("./routes/showRoutes");
 const bookRoute = require("./routes/bookingRoutes");
 
 const app = express();
+app.set('trust proxy', 1); // Required for Render / any reverse proxy
 const PORT = process.env.PORT || 8080;
 
 connectDB(process.env.DB_URL);

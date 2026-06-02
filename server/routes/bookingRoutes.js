@@ -9,6 +9,9 @@ const EmailHelper = require("../utils/emailHelper");
 router.post("/make-payment", authMiddleware, async (req, res) => {
   try {
     const { showId, seats, userId, amount } = req.body;
+
+    // Auto-detect frontend URL from the request (works on any host, no env var needed)
+    const clientUrl = req.headers.origin || req.headers.referer?.replace(/\/$/, "") || "";
  
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -26,8 +29,8 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `https://your-app-name.onrender.com/book-show/${showId}?seats=${seats.join(",")}&userId=${userId}&session_id={CHECKOUT_SESSION_ID}`,
-cancel_url: `https://your-app-name.onrender.com/`,
+      success_url: `${clientUrl}/book-show/${showId}?seats=${seats.join(",")}&userId=${userId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${clientUrl}/`,
     });
  
     res.send({
