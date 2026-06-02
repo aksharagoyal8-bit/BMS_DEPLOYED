@@ -4,7 +4,7 @@ import Bookings from "./Bookings";
 const Profile = () => {
   const items = [
     {
-      key: "",
+      key: "1",
       label: "Bookings",
       children: <Bookings />,
     },

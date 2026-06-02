@@ -10,10 +10,10 @@ const Bookings = () => {
   const getData = async () => {
     try { 
       const response = await getAllBookings();
-      if (response.success) {
+      if (response?.success) {
         setBookings(response.data);
       } else {
-        message.error(response.message);
+        message.error(response?.message || "Failed to fetch bookings");
       }
     } catch (err) {
       message.error(err.message);

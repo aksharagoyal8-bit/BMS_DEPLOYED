@@ -10,7 +10,20 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
   try {
     const { showId, seats, userId, amount } = req.body;
 
-    const clientUrl = req.headers.origin || req.headers.referer?.replace(/\/$/, "") || "";
+    const rawClientUrl =
+      req.headers.origin ||
+      req.headers.referer ||
+      process.env.CLIENT_URL ||
+      "";
+    const clientUrl = String(rawClientUrl).replace(/\/$/, "");
+
+    if (!clientUrl) {
+      return res.status(400).send({
+        success: false,
+        message:
+          "Unable to determine client URL. Set CLIENT_URL or send Origin/Referer header.",
+      });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -80,7 +93,7 @@ router.post("/book-show", authMiddleware, async (req, res) => {
         populatedBooking.user.email,
         {
           name: populatedBooking.user.name,
-          movie: populatedBooking.show.movie.title,
+          movie: populatedBooking.show.movie.movieName,
           theatre: populatedBooking.show.theatre.name,
           date: populatedBooking.show.date,
           time: populatedBooking.show.time,
