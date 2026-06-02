@@ -16,7 +16,20 @@ const PORT = process.env.PORT || 8080;
 
 connectDB(process.env.DB_URL);
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https:",
+        ],
+      },
+    },
+  })
+);
 app.use(express.json());
 app.use(cors());
 
