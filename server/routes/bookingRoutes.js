@@ -12,7 +12,7 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
 
     const clientUrl = (
       req.headers.origin ||
-      req.headers.referer?.replace(/\/$/, "") ||
+      req.headers.referer ||
       process.env.CLIENT_URL ||
       ""
     ).replace(/\/$/, "");
@@ -20,7 +20,8 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
     if (!clientUrl) {
       return res.send({
         success: false,
-        message: "Client URL is not configured",
+        message:
+          "Unable to determine client URL. Set CLIENT_URL or send Origin/Referer header.",
       });
     }
 
