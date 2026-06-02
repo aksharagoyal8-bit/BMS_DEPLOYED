@@ -41,7 +41,7 @@ const apiLimiter = rateLimit({
 });
 
 
-app.use("/api/", apiLimiter);
+app.use("/api", apiLimiter);
 app.use("/api/users", userRoute);
 app.use("/api/movie", movieRoute);
 app.use("/api/theatre", theatreRoutes);
@@ -50,7 +50,7 @@ app.use("/api/booking", bookRoute);
 
 
 app.use(express.static(path.join(__dirname, 'build')));
-app.get('*path', (req, res) => {
+app.get(/^(?!\/api).*$/, (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
