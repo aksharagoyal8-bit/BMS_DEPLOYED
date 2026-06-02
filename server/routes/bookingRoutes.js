@@ -5,14 +5,13 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const bookingModel = require("../models/bookingModel");
 const showModel = require("../models/showModel");
 const EmailHelper = require("../utils/emailHelper");
- 
+
 router.post("/make-payment", authMiddleware, async (req, res) => {
   try {
     const { showId, seats, userId, amount } = req.body;
 
-    // Auto-detect frontend URL from the request (works on any host, no env var needed)
     const clientUrl = req.headers.origin || req.headers.referer?.replace(/\/$/, "") || "";
- 
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
@@ -32,7 +31,7 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
       success_url: `${clientUrl}/book-show/${showId}?seats=${seats.join(",")}&userId=${userId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${clientUrl}/`,
     });
- 
+
     res.send({
       success: true,
       message: "Checkout session created",
@@ -45,51 +44,61 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
     });
   }
 });
- 
+
 router.post("/book-show", authMiddleware, async (req, res) => {
   try {
     const { show, transactionId, seats, user } = req.body;
- 
+
     const newBooking = new bookingModel({ show, transactionId, seats, user });
     await newBooking.save();
- 
+
     const showData = await showModel.findById(show).populate("movie");
     const updatedBookedSeats = [...showData.bookedSeats, ...seats];
     showData.bookedSeats = updatedBookedSeats;
     await showData.save();
 
-    const populatedBooking=await bookingModel.findById(newBooking._id).populate("show").
-    populate("user").populate("show").populate({
-      path:"show",
-      populate:{
-        path:"movie",
-        model:"movies"
-      }
-    }).populate({
-      path:"show",
-      populate:{
-        path:"theatre",
-        model:"theatres",
-      }
-    });
-  
- 
-   await EmailHelper("ticketTemplate.html",populatedBooking.user.email, {
-      name: populatedBooking.user.name,
-      movie: populatedBooking.show.movie.movieName,
-      theatre: populatedBooking.show.theatre.name,
-      date: populatedBooking.show.date,
-      time: populatedBooking.show.time,
-      seats: populatedBooking.seats,
-      amount: populatedBooking.seats.length * populatedBooking.show.ticketPrice,
-      transactionId: populatedBooking.transactionId,
-    },"Booking Confirmation");
+    // ✅ FIXED: Single populate with array for both movie and theatre
+    const populatedBooking = await bookingModel
+      .findById(newBooking._id)
+      .populate("user")
+      .populate({
+        path: "show",
+        populate: [
+          { path: "movie", model: "movies" },
+          { path: "theatre", model: "theatres" },
+        ],
+      });
 
-      res.send({
-      success:true,
-      message:"Show Booked",
-      data:populatedBooking
-    })
+    // ✅ FIXED: Added safety check before sending email
+    if (
+      populatedBooking.show &&
+      populatedBooking.show.movie &&
+      populatedBooking.show.theatre
+    ) {
+      await EmailHelper(
+        "ticketTemplate.html",
+        populatedBooking.user.email,
+        {
+          name: populatedBooking.user.name,
+          movie: populatedBooking.show.movie.movieName,
+          theatre: populatedBooking.show.theatre.name,
+          date: populatedBooking.show.date,
+          time: populatedBooking.show.time,
+          seats: populatedBooking.seats,
+          amount: populatedBooking.seats.length * populatedBooking.show.ticketPrice,
+          transactionId: populatedBooking.transactionId,
+        },
+        "Booking Confirmation"
+      );
+    } else {
+      console.error("Populate failed — show/movie/theatre missing:", populatedBooking);
+    }
+
+    res.send({
+      success: true,
+      message: "Show Booked",
+      data: populatedBooking,
+    });
   } catch (err) {
     res.send({
       success: false,
@@ -97,25 +106,21 @@ router.post("/book-show", authMiddleware, async (req, res) => {
     });
   }
 });
- 
+
 router.get("/all-booking-by-user", authMiddleware, async (req, res) => {
   try {
-    const bookings = await bookingModel.find({ user: req.user.userId }).populate("show")
+    // ✅ FIXED: Single populate with array for both movie and theatre
+    const bookings = await bookingModel
+      .find({ user: req.user.userId })
       .populate("user")
       .populate({
         path: "show",
-        populate: {
-          path: "movie",
-          model: "movies",
-        },
-      })
-      .populate({
-        path: "show",
-        populate: {
-          path: "theatre",
-          model: "theatres",
-        },
+        populate: [
+          { path: "movie", model: "movies" },
+          { path: "theatre", model: "theatres" },
+        ],
       });
+
     res.send({
       success: true,
       message: "All bookings have been fetched",
@@ -128,5 +133,5 @@ router.get("/all-booking-by-user", authMiddleware, async (req, res) => {
     });
   }
 });
- 
+
 module.exports = router;

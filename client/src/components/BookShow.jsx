@@ -153,12 +153,10 @@ const BookShow = () => {
   };
 
   useEffect(() => {
-    getData();
-  }, []);
-
-  useEffect(() => {
-    confirmBookingAfterPayment(); 
-  }, []);
+  getData().then(() => {
+    confirmBookingAfterPayment();
+  });
+}, []);
 
   return (
     <>

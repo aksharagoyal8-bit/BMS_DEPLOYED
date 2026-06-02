@@ -28,9 +28,9 @@ const Bookings = () => {
     <>
       {bookings && (
         <Row gutter={24}>
-          {bookings.map((booking) => {
-            return (
-              <Col key={booking._id} xs={{ span: 24 }} lg={{ span: 12 }}>
+          {bookings.filter(booking => booking.show && booking.show.movie && booking.show.theatre).map((booking) => {
+  return (
+    <Col key={booking._id} xs={{ span: 24 }} lg={{ span: 12 }}>
                 <Card className="mb-3">
                   <div className="d-flex flex-column-mob">
                     <div className="flex-shrink-0">
