@@ -15,8 +15,7 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
       req.headers.referer ||
       process.env.CLIENT_URL ||
       "";
-    const clientUrl =
-      typeof rawClientUrl === "string" ? rawClientUrl.replace(/\/$/, "") : "";
+    const clientUrl = String(rawClientUrl).replace(/\/$/, "");
 
     if (!clientUrl) {
       return res.send({
