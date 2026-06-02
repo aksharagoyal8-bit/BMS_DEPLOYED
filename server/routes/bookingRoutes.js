@@ -80,7 +80,7 @@ router.post("/book-show", authMiddleware, async (req, res) => {
         populatedBooking.user.email,
         {
           name: populatedBooking.user.name,
-          movie: populatedBooking.show.movie.movieName,
+          movie: populatedBooking.show.movie.title,
           theatre: populatedBooking.show.theatre.name,
           date: populatedBooking.show.date,
           time: populatedBooking.show.time,
