@@ -2,6 +2,7 @@
 require('dotenv').config(); 
 const express = require('express');
 const cors=require("cors");
+const path=require("path");
 const rateLimit= require("express-rate-limit");
 const helmet=require ("helmet");
 const connectDB = require('./config/db');
@@ -11,6 +12,10 @@ const theatreRoutes=require("./routes/theatreRoutes");
 const showRoute=require("./routes/showRoutes");
 const bookRoute=require("./routes/bookingRoutes");
 
+app.use(express.static(path.join(__dirname, 'build') ));
+app.get('*',(req,res)=>{
+    res.sendFile(path.join(__dirname, 'build','index.html'));
+})
 
 connectDB(process.env.DB_URL);
 
