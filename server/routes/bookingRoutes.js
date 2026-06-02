@@ -1,6 +1,7 @@
 const Stripe = require("stripe");
 const stripe = Stripe(process.env.STRIPE_KEY);
 const router = require("express").Router();
+const mongoose = require("mongoose");
 const authMiddleware = require("../middlewares/authMiddleware");
 const bookingModel = require("../models/bookingModel");
 const showModel = require("../models/showModel");
@@ -62,6 +63,12 @@ router.post("/book-show", authMiddleware, async (req, res) => {
   try {
     const { show, transactionId, seats } = req.body;
     const user = req.user.userId;
+    if (!mongoose.Types.ObjectId.isValid(show) || !mongoose.Types.ObjectId.isValid(user)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid booking details",
+      });
+    }
 
     const newBooking = new bookingModel({ show, transactionId, seats, user });
     await newBooking.save();
