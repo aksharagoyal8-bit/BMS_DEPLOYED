@@ -18,7 +18,7 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
     const clientUrl = String(rawClientUrl).replace(/\/$/, "");
 
     if (!clientUrl) {
-      return res.send({
+      return res.status(400).send({
         success: false,
         message:
           "Unable to determine client URL. Set CLIENT_URL or send Origin/Referer header.",
