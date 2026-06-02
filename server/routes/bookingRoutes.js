@@ -26,8 +26,8 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `http://localhost:3000/book-show/${showId}?seats=${seats.join(",")}&userId=${userId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:3000/`,
+      success_url: `https://your-app-name.onrender.com/book-show/${showId}?seats=${seats.join(",")}&userId=${userId}&session_id={CHECKOUT_SESSION_ID}`,
+cancel_url: `https://your-app-name.onrender.com/`,
     });
  
     res.send({
