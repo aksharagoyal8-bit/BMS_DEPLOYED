@@ -10,7 +10,19 @@ router.post("/make-payment", authMiddleware, async (req, res) => {
   try {
     const { showId, seats, userId, amount } = req.body;
 
-    const clientUrl = req.headers.origin || req.headers.referer?.replace(/\/$/, "") || "";
+    const clientUrl = (
+      req.headers.origin ||
+      req.headers.referer?.replace(/\/$/, "") ||
+      process.env.CLIENT_URL ||
+      ""
+    ).replace(/\/$/, "");
+
+    if (!clientUrl) {
+      return res.send({
+        success: false,
+        message: "Client URL is not configured",
+      });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
