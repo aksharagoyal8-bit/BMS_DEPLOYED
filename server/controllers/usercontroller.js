@@ -50,7 +50,7 @@ const readuser= async function (req,res) {
       
      }
 
-      const token=jwt.sign({userID:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"1d"});
+      const token=jwt.sign({userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"1d"});
     console.log(token);
      res.send({
         success:true,
@@ -89,7 +89,7 @@ const getCurrentUser=async(req,res)=>{
 }
 
 const generateOtp=()=>{
-    const otp=Math.floor(Math.random()*100000)+90000;
+    const otp = Math.floor(100000 + Math.random() * 900000);
     return otp;
 }
 const forgotPassword=async(req,res)=>{
@@ -112,11 +112,9 @@ const forgotPassword=async(req,res)=>{
     user.otp=otp;
     user.otpExpiry=Date.now()+5*60*1000;
     await user.save();
-    res.send({
-        success:true,
-        message:"OTP sent to your email",
-    })
-    await EmailHelper("otp.html",user.email,{name:user.name,otp:user.otp},"OTP for BookMyShowclone")
+   
+ await EmailHelper("otp.html", user.email, { name: user.name, otp: user.otp }, "OTP for BookMyShowclone");
+  res.send({ success: true, message: "OTP sent to your email" });
     }catch(err){
         res.send({
             success:false,
