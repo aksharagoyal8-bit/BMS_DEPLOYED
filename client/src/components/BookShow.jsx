@@ -33,9 +33,8 @@ const BookShow = () => {
   const confirmBookingAfterPayment = async () => {
     const sessionId = searchParams.get("session_id");
     const seats = searchParams.get("seats");
-    const userId = searchParams.get("userId");
 
-    if (!sessionId || !seats || !userId) return; // not a redirect, normal page load
+    if (!sessionId || !seats) return; // not a redirect, normal page load
     if (hasConfirmed.current) return;
     hasConfirmed.current = true;
     try {
@@ -43,7 +42,6 @@ const BookShow = () => {
         show: params.id,
         transactionId: sessionId,
         seats: seats.split(",").map(Number),
-        user: userId,
       });
 
       if (resp.success) {
