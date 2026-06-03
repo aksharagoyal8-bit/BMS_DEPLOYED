@@ -29,15 +29,32 @@ export const GetCurrentUser=async ()=>{
     }
 }
 
-export const ForgotPassword = async (values) => {
+const forgotPassword = async (req, res) => {
   try {
-    const response = await axiosInstance.patch(
-      `/api/users/forgot-password`,
-      values
-    );
-    return response.data;
+    if (req.body.email === undefined) {
+      return res.send({ success: false, message: "E-mail is required" });
+    }
+
+    const user = await usermodel.findOne({ email: req.body.email });
+    if (!user) {
+      return res.send({ success: false, message: "User with this email does not exist" });
+    }
+
+    const otp = generateOtp();
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
+    await user.save();
+
+    try {
+      await EmailHelper("otp.html", user.email, { name: user.name, otp: user.otp }, "OTP for BookMyShowclone");
+      res.send({ success: true, message: "OTP sent to your email" });
+    } catch (emailErr) {
+      // ← This will now tell you EXACTLY what's failing
+      res.send({ success: false, message: `Email failed: ${emailErr.message}` });
+    }
+
   } catch (err) {
-    console.log(err);
+    res.send({ success: false, message: err.message });
   }
 };
 
