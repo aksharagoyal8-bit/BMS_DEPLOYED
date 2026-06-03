@@ -29,7 +29,7 @@ export const GetCurrentUser=async ()=>{
     }
 }
 
-const forgotPassword = async (req, res) => {
+const ForgotPassword = async (req, res) => {
   try {
     if (req.body.email === undefined) {
       return res.send({ success: false, message: "E-mail is required" });
